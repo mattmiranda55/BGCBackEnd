@@ -43,14 +43,36 @@ def graft_detail_by_id(request, id, format=None):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@api_view(['GET', 'PUT', 'DELETE'])
 def graft_detail_by_category(request, category, format=None):
     try:
-        graft = Graft.objects.get(pk=category)
+        graft = Graft.objects.filter(category=category)
     except Graft.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == "GET":
-        serializer = GraftSerializer(graft)
+        serializer = GraftSerializer(graft, many=True)
+        return Response(serializer.data)
+    elif request.method == "PUT":
+        serializer = GraftSerializer(graft, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == "DELETE":
+        graft.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def graft_detail_by_regulation(request, regulation, format=None):
+    try:
+        graft = Graft.objects.filter(regulation=regulation)
+    except Graft.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serializer = GraftSerializer(graft, many=True)
         return Response(serializer.data)
     elif request.method == "PUT":
         serializer = GraftSerializer(graft, data=request.data)

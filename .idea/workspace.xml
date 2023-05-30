@@ -5,8 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6539f71c-5182-4a55-a62c-21cae0dc7589" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/BGC_Back_End/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/BGC_Back_End/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BGC_Back_End/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/BGC_Back_End/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BGC_Back_End/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/BGC_Back_End/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BGC_Back_End/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/BGC_Back_End/views.py" afterDir="false" />
     </list>
@@ -55,5 +54,16 @@
       <updated>1684939529547</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
