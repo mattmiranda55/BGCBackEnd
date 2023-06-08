@@ -22,8 +22,8 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("grafts/", views.graft_list),
     path("grafts/<int:id>", views.graft_detail_by_id),
-    path("grafts/search/cat/<str:category>", views.graft_detail_by_category),
-    path("grafts/search/reg/<str:regulation>", views.graft_detail_by_regulation)
+    path("grafts/search/cat/<int:category>", views.graft_detail_by_category),
+    path("grafts/search/reg/<int:regulation>", views.graft_detail_by_regulation)
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
