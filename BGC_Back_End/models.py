@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
+from django.contrib.auth.hashers import make_password, check_password
 
 
 class Regulation(models.Model):
@@ -21,6 +22,7 @@ class Company(models.Model):
     address = models.CharField()
     created_at = models.DateTimeField(auto_now_add=True)
 
+
 class CustomUserManager(UserManager):
     def _create_user(self, username, email, password, **extra_fields):
         if not email:
@@ -28,7 +30,9 @@ class CustomUserManager(UserManager):
 
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
-        user.set_password(password)
+        hashed_pwd = make_password(password)
+        check_password(password, hashed_pwd)
+        user.set_password(hashed_pwd)
         user.save(using=self._db)
 
         return user
