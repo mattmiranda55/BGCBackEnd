@@ -89,7 +89,7 @@ DATABASES = {
         "NAME": "postgres",
         "USER": "postgres",
         "PASSWORD": "BGCadmin123db",
-        "HOST": "localhost",
+        "HOST": "bgc-db.csxbvzn5jwtr.us-east-1.rds.amazonaws.com",
         "PORT": "5432",
     }
 }
