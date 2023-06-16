@@ -86,7 +86,7 @@ WSGI_APPLICATION = "BGC_Back_End.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",
+        "NAME": "bgc_initial",
         "USER": "postgres",
         "PASSWORD": "BGCadmin123db",
         "HOST": "bgc-db.csxbvzn5jwtr.us-east-1.rds.amazonaws.com",

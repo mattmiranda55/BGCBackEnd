@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6539f71c-5182-4a55-a62c-21cae0dc7589" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.venv/lib/python3.9/site-packages/django/conf/global_settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/.venv/lib/python3.9/site-packages/django/conf/global_settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BGC_Back_End/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/BGC_Back_End/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BGC_Back_End/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/BGC_Back_End/settings.py" afterDir="false" />
-    </list>
+    <list default="true" id="6539f71c-5182-4a55-a62c-21cae0dc7589" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
