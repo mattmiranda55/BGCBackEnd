@@ -92,7 +92,7 @@ def get_cat_name(request, category, format=None):
     except Category.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    return Category.__str__(cat_id)
+    return Response(Category.__str__(cat_id))
 
 
 @api_view(['GET'])
@@ -102,4 +102,4 @@ def get_reg_name(request, regulation, format=None):
     except Regulation.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    return Regulation.__str__(cat_id)
+    return Response(Regulation.__str__(cat_id))
