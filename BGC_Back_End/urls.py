@@ -23,7 +23,9 @@ urlpatterns = [
     path("grafts/", views.graft_list),
     path("grafts/<int:id>", views.graft_detail_by_id),
     path("grafts/search/cat/<int:category>", views.graft_detail_by_category),
-    path("grafts/search/reg/<int:regulation>", views.graft_detail_by_regulation)
+    path("grafts/search/reg/<int:regulation>", views.graft_detail_by_regulation),
+    path("grafts/<int:category>/cat", views.get_cat_name),
+    path("grafts/<int:regulation>/reg", views.get_reg_name)
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

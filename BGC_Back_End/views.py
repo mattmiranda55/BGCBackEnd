@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from .models import Graft
+from .models import Graft, Category, Regulation
 from .serializers import GraftSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -83,3 +83,23 @@ def graft_detail_by_regulation(request, regulation, format=None):
     elif request.method == "DELETE":
         graft.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+def get_cat_name(request, category, format=None):
+    try:
+        cat_id = Category.objects.get(id=category)
+    except Category.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    return Category.__str__(cat_id)
+
+
+@api_view(['GET'])
+def get_reg_name(request, regulation, format=None):
+    try:
+        cat_id = Regulation.objects.get(id=regulation)
+    except Regulation.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    return Regulation.__str__(cat_id)
