@@ -103,3 +103,10 @@ def get_reg_name(request, regulation, format=None):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     return Response(Regulation.__str__(cat_id))
+
+
+@api_view(['GET'])
+def get_image(request, format=None):
+    image_file = request.FILES['image'].file.read()
+    Graft.objects.create(image=image_file)
+

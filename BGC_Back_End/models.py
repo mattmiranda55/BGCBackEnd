@@ -29,6 +29,8 @@ class Graft(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     regulation = models.ForeignKey(Regulation, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+    image = models.BinaryField(blank=True)
+    purchase_link = models.URLField(blank=True)
 
     def __str__(self):
         return self.name
