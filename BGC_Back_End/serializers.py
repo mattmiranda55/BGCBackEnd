@@ -24,3 +24,23 @@ class RegulationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Regulation
         fields = ['id', 'name']
+
+
+
+
+"""
+
+User / Profile Serializers 
+
+
+"""
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['user_id', 'num_credits', 'business_name', 'phone_number']
+        
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email']

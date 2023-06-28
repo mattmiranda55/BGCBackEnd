@@ -20,12 +20,26 @@ from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    
+    # Graft endpoints
     path("grafts/", views.graft_list),
     path("grafts/<int:id>", views.graft_detail_by_id),
     path("grafts/search/cat/<int:category>", views.graft_detail_by_category),
     path("grafts/search/reg/<int:regulation>", views.graft_detail_by_regulation),
     path("grafts/<int:category>/cat", views.get_cat_name),
-    path("grafts/<int:regulation>/reg", views.get_reg_name)
+    path("grafts/<int:regulation>/reg", views.get_reg_name),
+    
+    # User / Profile endpoints
+    path("users/", views.user_list),
+    path("users/<int:id>", views.user_detail_by_id),
+    path("users/<str:username>", views.user_detail_by_username),
+    path("userByEmail/<str:email>", views.user_detail_by_email),
+    
+    path("profiles/", views.profile_list),
+    path("profiles/<str:business_name>", views.profile_detail_by_business_name),
+    # path("profiles/<int:phone_number>", views.profile_detail_by_phone_number),
+    
+    
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
