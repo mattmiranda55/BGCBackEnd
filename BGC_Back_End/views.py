@@ -5,6 +5,7 @@ from .serializers import GraftSerializer, ProfileSerializer, UserSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+# from argon2 import PasswordHasher
 
 
 
@@ -231,6 +232,28 @@ def profile_list(request, format=None):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def profile_detail_by_user_id(request, user_id, format=None):
+
+    try:
+        profile = Profile.objects.get(user_id=user_id)
+    except Profile.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serializer = ProfileSerializer(profile)
+        return Response(serializer.data)
+    elif request.method == "PUT":
+        serializer = ProfileSerializer(profile, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == "DELETE":
+        profile.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -261,22 +284,42 @@ def profile_detail_by_business_name(request, business_name, format=None):
 def profile_detail_by_username(request, username, format=None):
 
     try:
-        user = User.objects.get(username=username)
-    except User.DoesNotExist:
+        profile = Profile.objects.get(username=username)
+    except Profile.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == "GET":
-        serializer = UserSerializer(user)
+        serializer = ProfileSerializer(profile)
         return Response(serializer.data)
     elif request.method == "PUT":
-        serializer = UserSerializer(user, data=request.data)
+        serializer = ProfileSerializer(profile, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == "DELETE":
-        user.delete()
+        profile.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 
+@api_view(['GET', 'PUT', 'DELETE'])
+def profile_detail_by_phone_number(request, phone_number, format=None):
+
+    try:
+        profile = Profile.objects.get(phone_number=phone_number)
+    except Profile.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serializer = ProfileSerializer(profile)
+        return Response(serializer.data)
+    elif request.method == "PUT":
+        serializer = ProfileSerializer(profile, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == "DELETE":
+        profile.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

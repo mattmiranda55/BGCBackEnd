@@ -56,9 +56,7 @@ Profile model extends the User model
 Includes addittional fields...
 1. Credits 
 2. BusinessName 
-3. Username 
-4. Phone Number
-5. 
+3. Phone Number 
 
 """
 class Profile(models.Model):

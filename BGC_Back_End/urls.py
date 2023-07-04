@@ -36,8 +36,8 @@ urlpatterns = [
     path("userByEmail/<str:email>", views.user_detail_by_email),
     
     path("profiles/", views.profile_list),
+    path("profiles/<int:user_id>", views.profile_detail_by_user_id),
     path("profiles/<str:business_name>", views.profile_detail_by_business_name),
-    # path("profiles/<int:phone_number>", views.profile_detail_by_phone_number),
     
     
 ]
