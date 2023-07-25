@@ -35,9 +35,19 @@ urlpatterns = [
     path("users/<str:username>", views.user_detail_by_username),
     path("userByEmail/<str:email>", views.user_detail_by_email),
     
+    # User Auth endpoints
+    # use /users/ to POST new users 
+    path("users/login/", views.login),
+    path("users/info/", views.userInfo),
+    path("users/logout/", views.logout),
+    
+    
     path("profiles/", views.profile_list),
     path("profiles/<int:user_id>", views.profile_detail_by_user_id),
-    path("profilesByBusinessName/<str:business_name>", views.profile_detail_by_business_name),
+    path("profilesByBusinessName/<str:business_name>", views.profile_detail_by_business_name)
+    
+    
+   
     
     
 ]

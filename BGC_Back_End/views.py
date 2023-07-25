@@ -5,7 +5,12 @@ from .serializers import GraftSerializer, ProfileSerializer, UserSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-# from argon2 import PasswordHasher
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.hashers import make_password
+import jwt
+import datetime
+import json
 
 
 
@@ -129,6 +134,9 @@ User / Profile API Methods
 
 """
 
+
+
+
 @api_view(['GET', 'POST'])
 def user_list(request, format=None):
 
@@ -137,11 +145,26 @@ def user_list(request, format=None):
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
 
-    if request.method == "POST":
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    """Creating new users"""
+    if request.method == "POST":  
+        data = json.loads(request.body)
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
+        hashed_password = make_password(password)  # hashes password
+        
+        try:
+            new_user = User.objects.create(username=username, email=email, password=hashed_password)
+            return JsonResponse({'message': 'User Creation Succesful'})
+        except:
+            return JsonResponse({'message': 'User Creation Failed'})
+        
+        
+        # serializer = UserSerializer(data=request.data)
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 
     
@@ -233,6 +256,7 @@ def profile_list(request, format=None):
 
 
 
+@csrf_exempt
 @api_view(['GET', 'PUT', 'DELETE'])
 def profile_detail_by_user_id(request, user_id, format=None):
 
@@ -323,3 +347,106 @@ def profile_detail_by_phone_number(request, phone_number, format=None):
     elif request.method == "DELETE":
         profile.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    
+    
+
+
+
+
+"""
+
+Authentication Endpoints ==============================================================================
+
+
+"""
+
+
+
+@api_view(['POST'])
+def login(request):
+    if request.method == 'POST':
+        
+        # Get the request data as a dictionary
+        data = json.loads(request.body)
+        email = data.get('email')
+        password = data.get('password')
+        
+        # find user by email in request payload
+        user = User.objects.filter(email=email).first()
+        
+        # if user not found
+        if user is None:
+            return JsonResponse({'message': 'Invalid email or password'})
+        
+        # checking password match, check_passwords checks hashed passwords
+        if not user.check_password(password):
+            return JsonResponse({'message': 'Incorrect Password'})
+        
+        # creating jwt token
+        payload = {
+            'id': user.id,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=120),
+            'iat': datetime.datetime.utcnow()
+        }
+        token = jwt.encode(payload, 'BGCcret', algorithm='HS256')  # second param is secret key for hashing
+    
+        
+        # if succesful login 
+        print("Login Successful")
+        
+        # returning jwt token as cookie 
+        response = Response()
+        response.set_cookie(key='jwt', value=token, httponly=True)
+        response.data = {
+            'jwt': token
+        }
+        return response
+        
+            
+    else:
+        return JsonResponse({'message': 'Invalid authentication request'}, status=405)
+    
+    
+
+"""
+
+This method takes the current authenticated user and returns their data as cookies to the client
+Username, email etc
+
+"""
+@api_view(['GET'])
+def userInfo(request):
+    
+    # pull token from cookies 
+    token = request.COOKIES.get('jwt')
+    
+    # checks for jwt token (credentials)
+    if not token:
+        raise AuthenticationFailed('You are not logged in')
+
+    # decode jwt
+    try:
+        payload = jwt.decode(token, 'BGCcret', algorithms=['HS256'])
+    except jwt.ExpiredSignatureError:
+        raise AuthenticationFailed('You are not logged in')
+    
+    # get user data using id within token
+    user = User.objects.filter(id=payload['id']).first()
+    serializer = UserSerializer(user)
+    return Response(serializer.data) 
+
+
+
+@api_view(['POST'])
+def logout(request):
+    if request.method == 'POST':
+    
+        # delete cookie from session 
+        response = Response()
+        response.delete_cookie('jwt')
+        response.data = {
+            "message": "Successfully Logged Out"
+        }
+        
+        return response
