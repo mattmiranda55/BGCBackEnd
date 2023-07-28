@@ -135,6 +135,21 @@ User / Profile API Methods
 """
 
 
+# methods to check is username or email is taken
+def is_email_taken(email):
+    try:
+        user = User.objects.get(email=email)
+        return True
+    except User.DoesNotExist:
+        return False
+
+def is_username_taken(username):
+    try:
+        user = User.objects.get(username=username)
+        return True
+    except User.DoesNotExist:
+        return False
+
 
 
 @api_view(['GET', 'POST'])
@@ -153,17 +168,16 @@ def user_list(request, format=None):
         password = data.get('password')
         hashed_password = make_password(password)  # hashes password
         
-        try:
-            new_user = User.objects.create(username=username, email=email, password=hashed_password)
-            return JsonResponse({'message': 'User Creation Succesful'})
-        except:
-            return JsonResponse({'message': 'User Creation Failed'})
+        if is_email_taken(email):
+            return JsonResponse({'message': "Email is already taken"})  
+        if is_username_taken(username):
+            return JsonResponse({'message': "Username is already taken"})
+        
+        new_user = User.objects.create(username=username, email=email, password=hashed_password)
+        return JsonResponse({'id': new_user.id})
+
         
         
-        # serializer = UserSerializer(data=request.data)
-        # if serializer.is_valid():
-        #     serializer.save()
-        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 
@@ -364,7 +378,8 @@ Authentication Endpoints =======================================================
 
 
 @api_view(['POST'])
-def login(request):
+@csrf_exempt
+def loginUser(request):
     if request.method == 'POST':
         
         # Get the request data as a dictionary
@@ -395,13 +410,9 @@ def login(request):
         # if succesful login 
         print("Login Successful")
         
-        # returning jwt token as cookie 
-        response = Response()
-        response.set_cookie(key='jwt', value=token, httponly=True)
-        response.data = {
-            'jwt': token
-        }
-        return response
+        # returning jwt token
+        # frontend will store token into localstorage
+        return JsonResponse({'jwt': token})
         
             
     else:
@@ -415,36 +426,47 @@ This method takes the current authenticated user and returns their data as cooki
 Username, email etc
 
 """
-@api_view(['GET'])
+@api_view(['POST'])
 def userInfo(request):
     
-    # pull token from cookies 
-    token = request.COOKIES.get('jwt')
+    if request.method == 'POST':
     
-    # checks for jwt token (credentials)
-    if not token:
-        raise AuthenticationFailed('You are not logged in')
+        # pull token from cookies 
+        data = json.loads(request.body)
+        token = data.get('jwtToken')
+        
+        # checks for jwt token (credentials)
+        if not token:
+            return JsonResponse({'message': 'You are not signed in'}) 
 
-    # decode jwt
-    try:
-        payload = jwt.decode(token, 'BGCcret', algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        raise AuthenticationFailed('You are not logged in')
-    
-    # get user data using id within token
-    user = User.objects.filter(id=payload['id']).first()
-    serializer = UserSerializer(user)
-    return Response(serializer.data) 
+        # decode jwt
+        try:
+            payload = jwt.decode(token, 'BGCcret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            return JsonResponse({'message': 'Invalid web token'}) 
+        
+        # get user data and profile data using id within token
+        user = User.objects.filter(id=payload['id']).first()
+        profile = Profile.objects.filter(user_id=payload['id']).first()
+        user_serializer = UserSerializer(user)
+        profile_serializer = ProfileSerializer(profile)
+        
+        return Response([user_serializer.data, profile_serializer.data]) 
 
 
 
 @api_view(['POST'])
 def logout(request):
     if request.method == 'POST':
+        
+        data = json.loads(request.body)
+        token = data.get('jwt')
+        
+        if not token:
+            return JsonResponse({"message": "You are not logged in!"})
     
         # delete cookie from session 
         response = Response()
-        response.delete_cookie('jwt')
         response.data = {
             "message": "Successfully Logged Out"
         }

@@ -37,7 +37,7 @@ urlpatterns = [
     
     # User Auth endpoints
     # use /users/ to POST new users 
-    path("users/login/", views.login),
+    path("users/login/", views.loginUser),
     path("users/info/", views.userInfo),
     path("users/logout/", views.logout),
     
