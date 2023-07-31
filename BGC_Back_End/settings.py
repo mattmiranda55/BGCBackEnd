@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "BGC_Back_End",
     "rest_framework",
     'corsheaders',
+    'paypal.standard.ipn',
 ]
 
 MIDDLEWARE = [
@@ -130,3 +131,7 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+PAYPAL_RECIEVER_EMAIL = 'bonegraftingtruth@gmail.com'
+
+PAYPAL_TEST = True

@@ -44,10 +44,11 @@ urlpatterns = [
     
     path("profiles/", views.profile_list),
     path("profiles/<int:user_id>", views.profile_detail_by_user_id),
-    path("profilesByBusinessName/<str:business_name>", views.profile_detail_by_business_name)
+    path("profilesByBusinessName/<str:business_name>", views.profile_detail_by_business_name),
     
     
-   
+   # PayPal endpoints
+#    path('paypal/', include('paypal.standard.ipn.urls')),
     
     
 ]

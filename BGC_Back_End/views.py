@@ -433,7 +433,7 @@ def userInfo(request):
     
         # pull token from cookies 
         data = json.loads(request.body)
-        token = data.get('jwtToken')
+        token = data.get('jwt')
         
         # checks for jwt token (credentials)
         if not token:
@@ -472,3 +472,11 @@ def logout(request):
         }
         
         return response
+
+
+"""
+
+PayPal Payment Views
+
+"""
+
