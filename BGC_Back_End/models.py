@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
 from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.postgres.fields import ArrayField
 
 # importing Django user model 
 from django.contrib.auth.models import User 
@@ -37,8 +38,11 @@ class Graft(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     regulation = models.ForeignKey(Regulation, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    image = models.BinaryField(blank=True)
     purchase_link = models.URLField(blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    created_by = models.CharField(null=True)
+    documents = ArrayField(models.URLField(), blank=True, null=True)
+    image = models.ImageField(upload_to='grafts/images/', null=True)
 
     def __str__(self):
         return self.name

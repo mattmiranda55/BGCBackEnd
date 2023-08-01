@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "rest_framework",
     'corsheaders',
     'paypal.standard.ipn',
+    'storages'
 ]
 
 MIDDLEWARE = [
@@ -135,3 +136,19 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 PAYPAL_RECIEVER_EMAIL = 'bonegraftingtruth@gmail.com'
 
 PAYPAL_TEST = True
+
+
+
+
+# =========================================================
+#
+# S3 Bucklet config
+#
+# =========================================================
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+AWS_ACCESS_KEY_ID = 'AKIAYA3AOLTRRUEW75FR'
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_STORAGE_BUCKET_NAME = 'bone-graft-consortium-bucket'
+AWS_S3_REGION_NAME = 'us-east-1' 
+

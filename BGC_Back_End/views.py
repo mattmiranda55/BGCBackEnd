@@ -20,6 +20,8 @@ Graft API methods
 
 """
 
+
+
 @api_view(['GET', 'POST'])
 def graft_list(request, format=None):
 
@@ -28,11 +30,16 @@ def graft_list(request, format=None):
         serializer = GraftSerializer(grafts, many=True)
         return Response(serializer.data)
 
+    """
+    Storing new grafts
+    """
     if request.method == "POST":
         serializer = GraftSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
