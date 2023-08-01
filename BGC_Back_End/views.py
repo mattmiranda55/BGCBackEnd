@@ -24,7 +24,9 @@ Graft API methods
 
 
 
-
+"""
+Nethod for GETting and POSTing grafts
+"""
 @api_view(['GET', 'POST'])
 def graft_list(request, format=None):
 
@@ -76,6 +78,9 @@ def upload_image(request, id, format=None):
 
 
 
+"""
+Get graft by { whatever } views
+"""
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def graft_detail_by_id(request, id, format=None):
@@ -161,6 +166,11 @@ def get_reg_name(request, regulation, format=None):
     return Response(Regulation.__str__(cat_id))
 
 
+
+
+"""
+Returns graft mage
+"""
 @api_view(['GET'])
 def get_image(request, format=None):
     image_file = request.FILES['image'].file.read()
