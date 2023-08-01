@@ -2,7 +2,8 @@ from django.http import JsonResponse
 from .models import Graft, Category, Regulation, Profile
 from django.contrib.auth.models import User
 from .serializers import GraftSerializer, ProfileSerializer, UserSerializer
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
@@ -22,6 +23,8 @@ Graft API methods
 
 
 
+
+
 @api_view(['GET', 'POST'])
 def graft_list(request, format=None):
 
@@ -38,6 +41,38 @@ def graft_list(request, format=None):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
+
+
+
+
+
+
+"""
+Method for uploading images to graft
+
+This is seperated from the graft POST request since the 
+"""
+@api_view(['POST'])
+@parser_classes([MultiPartParser, FormParser])
+def upload_image(request, id, format=None):
+    if request.method == "POST":
+        try:
+            graft = Graft.objects.get(pk=id)
+        except Graft.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
+        image = request.data.get('image')
+        graft.image = image
+        
+        
+        return JsonResponse({"Message" : "Image succesfully added"})
+    
+    
+    
+
 
 
 

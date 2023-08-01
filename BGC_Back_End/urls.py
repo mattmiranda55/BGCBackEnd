@@ -28,6 +28,7 @@ urlpatterns = [
     path("grafts/search/reg/<int:regulation>", views.graft_detail_by_regulation),
     path("grafts/<int:category>/cat", views.get_cat_name),
     path("grafts/<int:regulation>/reg", views.get_reg_name),
+    path("grafts/<int:id>/img", views.upload_image),
     
     # User / Profile endpoints
     path("users/", views.user_list),

@@ -5,7 +5,7 @@ from .models import *
 class GraftSerializer(serializers.ModelSerializer):
     class Meta:
         model = Graft
-        fields = ['id', 'name', 'description', 'category', 'regulation', 'created_at', 'image', 'purchase_link', 'created_by', 'documents']
+        fields = ['id', 'name', 'description', 'category', 'regulation', 'created_at', 'image', 'price', 'purchase_link', 'created_by', 'documents']
 
 
 class CompanySerializer(serializers.ModelSerializer):
