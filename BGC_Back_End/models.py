@@ -43,6 +43,7 @@ class Graft(models.Model):
     created_by = models.CharField(null=True)
     documents = ArrayField(models.URLField(), blank=True, null=True)
     image = models.ImageField(upload_to='grafts/images/', null=True)
+    validated = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
