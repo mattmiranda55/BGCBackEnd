@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.postgres.fields import ArrayField
@@ -37,8 +38,8 @@ class Graft(models.Model):
     description = models.CharField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     regulation = models.ForeignKey(Regulation, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    purchase_link = models.URLField(blank=True)
+    created_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    purchase_link = models.CharField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     created_by = models.CharField(null=True)
     documents = ArrayField(models.URLField(), blank=True, null=True)
