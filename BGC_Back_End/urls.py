@@ -29,6 +29,8 @@ urlpatterns = [
     path("grafts/<int:category>/cat", views.get_cat_name),
     path("grafts/<int:regulation>/reg", views.get_reg_name),
     path("grafts/<int:id>/img", views.upload_image),
+    path("grafts/search/user", views.graft_detail_by_username),
+    
     
     # User / Profile endpoints
     path("users/", views.user_list),
@@ -41,7 +43,8 @@ urlpatterns = [
     path("users/login/", views.loginUser),
     path("users/info/", views.userInfo),
     path("users/logout/", views.logout),
-    
+    path("users/postgraft/", views.user_post_graft),
+    path("users/deletegraft/", views.user_delete_graft),
     
     path("profiles/", views.profile_list),
     path("profiles/<int:user_id>", views.profile_detail_by_user_id),

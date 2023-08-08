@@ -95,18 +95,47 @@ def graft_detail_by_id(request, id, format=None):
     if request.method == "GET":
         serializer = GraftSerializer(graft)
         return Response(serializer.data)
+    
     elif request.method == "PUT":
         serializer = GraftSerializer(graft, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    # when user deletes graft
+    # delete graft, and increase profile credits by 1
+    # first we check and decode jwt
+    # make sure user can only delete THEIR grafts 
     elif request.method == "DELETE":
+        
+        data = json.loads(request.body)
+        token = data.get('jwt')
+        
+        if not token:
+            return JsonResponse({'message': 'You are not signed in'}) 
+        try:
+            payload = jwt.decode(token, 'BGCcret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            return JsonResponse({'message': 'Invalid web token'}) 
+        
+        # get user data and profile data using id within token
+        user = User.objects.filter(username=graft.created_by).first()
+        profile = Profile.objects.filter(user_id=user.id).first()
+        
+        loggedInUserId = payload['id']
+        if user.id != loggedInUserId:
+            return JsonResponse({"message": "You do not have permission to delete this graft"})
+
+        profile.num_credits += 1
+        profile.save()
         graft.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return JsonResponse({"message": "Graft succesfully deleted"})
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
+
+
+@api_view(['GET'])
 def graft_detail_by_category(request, category, format=None):
     try:
         graft = Graft.objects.filter(category=category)
@@ -116,18 +145,18 @@ def graft_detail_by_category(request, category, format=None):
     if request.method == "GET":
         serializer = GraftSerializer(graft, many=True)
         return Response(serializer.data)
-    elif request.method == "PUT":
-        serializer = GraftSerializer(graft, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    elif request.method == "DELETE":
-        graft.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    # elif request.method == "PUT":
+    #     serializer = GraftSerializer(graft, data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # elif request.method == "DELETE":
+    #     graft.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
+@api_view(['GET'])
 def graft_detail_by_regulation(request, regulation, format=None):
     try:
         graft = Graft.objects.filter(regulation=regulation)
@@ -137,15 +166,15 @@ def graft_detail_by_regulation(request, regulation, format=None):
     if request.method == "GET":
         serializer = GraftSerializer(graft, many=True)
         return Response(serializer.data)
-    elif request.method == "PUT":
-        serializer = GraftSerializer(graft, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    elif request.method == "DELETE":
-        graft.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    # elif request.method == "PUT":
+    #     serializer = GraftSerializer(graft, data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # elif request.method == "DELETE":
+    #     graft.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['GET'])
@@ -168,10 +197,24 @@ def get_reg_name(request, regulation, format=None):
     return Response(Regulation.__str__(cat_id))
 
 
+"""
+Returns a list of grafts posted by a particular user
+"""
+@api_view(['POST'])
+def graft_detail_by_username(request):
+    
+    if request.method == "POST":  
+        data = json.loads(request.body)
+        username = data.get('username')
+        grafts = Graft.objects.filter(created_by=username)
+        responseData = list(grafts.values())
+        return JsonResponse(responseData, safe=False)
+
+
 
 
 """
-Returns graft mage
+Returns graft image
 """
 @api_view(['GET'])
 def get_image(request, format=None):
@@ -473,6 +516,8 @@ def loginUser(request):
         return JsonResponse({'message': 'Invalid authentication request'}, status=405)
     
     
+    
+    
 
 """
 
@@ -526,6 +571,78 @@ def logout(request):
         }
         
         return response
+    
+    
+    
+    
+"""
+When user posts graft, we need to subtract 1 credit
+"""
+@api_view(['POST'])
+def user_post_graft(request):
+    
+    if request.method == 'POST':
+        
+        data = json.loads(request.body)
+        token = data.get('jwt')
+        
+        if not token:
+            return JsonResponse({"message": "You are not logged in!"})
+        
+        # decode jwt
+        try:
+            payload = jwt.decode(token, 'BGCcret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            return JsonResponse({'message': 'Invalid web token'}) 
+        
+        # get user data and profile data using id within token
+        profile = Profile.objects.filter(user_id=payload['id']).first()
+        profile.num_credits -= 1
+        profile.save()
+        return JsonResponse({'message': 'You have used one token'}) 
+    
+
+
+
+"""
+When user deletes graft, we need to add 1 credit
+"""
+@api_view(['POST'])
+def user_delete_graft(request):
+    
+    if request.method == 'POST':
+        
+        data = json.loads(request.body)
+        token = data.get('jwt')
+        
+        if not token:
+            return JsonResponse({"message": "You are not logged in!"})
+        
+        # decode jwt
+        try:
+            payload = jwt.decode(token, 'BGCcret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            return JsonResponse({'message': 'Invalid web token'}) 
+        
+        # get user data and profile data using id within token
+        profile = Profile.objects.filter(user_id=payload['id']).first()
+        profile.num_credits += 1
+        return JsonResponse({'message': 'You have added one token'}) 
+
+
+
+@api_view(['POST'])
+def user_purchase_credits(request):
+
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        token = data.get('jwt')
+
+        if not token:
+            return JsonResponse({'message': 'You are not logged in!'})
+        
+        # try:
+            
 
 
 """
