@@ -641,7 +641,23 @@ def user_purchase_credits(request):
         if not token:
             return JsonResponse({'message': 'You are not logged in!'})
         
-        # try:
+        try:
+            payload = jwt.decode(token, 'BGCcret', algorithms=['HS256'])
+        except:
+            return JsonResponse({'message': 'Invalid web token'})
+        
+        profile = Profile.object.filter(user_id=payload['id']).first()
+
+        if data.get('purchasetype') == 'single':
+            profile.num_credits += 1
+            return JsonResponse({'message': 'You have added one token'}) 
+        elif data.get('purchasetype') == 'multiple':
+            profile.num_credits += 8
+            return JsonResponse({'message': 'You have added eight tokens'}) 
+        elif data.get('purchasetype') == 'unlimited':
+            profile.num_credits += 9999
+            return JsonResponse({'message': 'You have added unlimited tokens'}) 
+    
             
 
 
