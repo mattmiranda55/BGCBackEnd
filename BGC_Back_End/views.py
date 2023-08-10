@@ -28,6 +28,7 @@ Graft API methods
 Nethod for GETting and POSTing grafts
 """
 @api_view(['GET', 'POST'])
+@csrf_exempt
 def graft_list(request, format=None):
 
     if request.method == "GET":
@@ -49,7 +50,44 @@ def graft_list(request, format=None):
 
 
 
+"""
+Approve / Deny Grafts 
+Incoming payload must contain jwt and approve / decline and graft id
+"""
+@api_view(['POST'])
+def validate_graft(request, format=None):
+    
+    if request.method == "POST":
+           
+        data = json.loads(request.body)
+        token = data.get('jwt')
+        graftId = data.get('graft_id')
+        graft = Graft.objects.get(pk=graftId)
+        
+        
+        if not token:
+            return JsonResponse({'message': 'You are not signed in'}) 
+        try:
+            payload = jwt.decode(token, 'BGCcret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            return JsonResponse({'message': 'Invalid web token'}) 
+        
+        
+        loggedInUserId = payload['id']
+        loggedInUser = User.objects.filter(id=loggedInUserId).first()
+        loggedInUserIsStaff = loggedInUser.is_staff
+        
+        if loggedInUserIsStaff:
+            graft.validated = True
+            graft.save()
+            return JsonResponse({"message": "Graft validated"})
+        
+        else:
+            return JsonResponse({"message": "You do not have permission to approve grafts"})
+        
 
+        
+        
 
 
 
@@ -70,8 +108,7 @@ def upload_image(request, id, format=None):
         
         image = request.data.get('image')
         graft.image = image
-        
-        
+        graft.save()
         return JsonResponse({"Message" : "Image succesfully added"})
     
     
@@ -124,7 +161,10 @@ def graft_detail_by_id(request, id, format=None):
         profile = Profile.objects.filter(user_id=user.id).first()
         
         loggedInUserId = payload['id']
-        if user.id != loggedInUserId:
+        loggedInUser = User.objects.filter(id=loggedInUserId).first()
+        loggedInUserIsStaff = loggedInUser.is_staff
+        
+        if user.id != loggedInUserId and not loggedInUserIsStaff:
             return JsonResponse({"message": "You do not have permission to delete this graft"})
 
         profile.num_credits += 1
@@ -145,15 +185,8 @@ def graft_detail_by_category(request, category, format=None):
     if request.method == "GET":
         serializer = GraftSerializer(graft, many=True)
         return Response(serializer.data)
-    # elif request.method == "PUT":
-    #     serializer = GraftSerializer(graft, data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    # elif request.method == "DELETE":
-    #     graft.delete()
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 
 
 @api_view(['GET'])
@@ -166,15 +199,7 @@ def graft_detail_by_regulation(request, regulation, format=None):
     if request.method == "GET":
         serializer = GraftSerializer(graft, many=True)
         return Response(serializer.data)
-    # elif request.method == "PUT":
-    #     serializer = GraftSerializer(graft, data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    # elif request.method == "DELETE":
-    #     graft.delete()
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 
 @api_view(['GET'])
@@ -489,7 +514,7 @@ def loginUser(request):
         
         # if user not found
         if user is None:
-            return JsonResponse({'message': 'Invalid email or password'})
+            return JsonResponse({'message': 'Invalid email'})
         
         # checking password match, check_passwords checks hashed passwords
         if not user.check_password(password):
