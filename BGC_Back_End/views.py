@@ -95,18 +95,22 @@ def validate_graft(request, format=None):
 """
 Method for uploading images to graft
 
-This is seperated from the graft POST request since the 
+This is seperated from the graft POST request since the data type 
+is a file instead of JSON
 """
 @api_view(['POST'])
-@parser_classes([MultiPartParser, FormParser])
-def upload_image(request, id, format=None):
+def upload_image(request):
+    
     if request.method == "POST":
+        
+        graftId = request.POST.get('graft_id')
+        image = request.FILES.get('image')
+        
         try:
-            graft = Graft.objects.get(pk=id)
+            graft = Graft.objects.filter(id=graftId).first()
         except Graft.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         
-        image = request.data.get('image')
         graft.image = image
         graft.save()
         return JsonResponse({"Message" : "Image succesfully added"})

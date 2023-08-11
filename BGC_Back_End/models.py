@@ -43,7 +43,7 @@ class Graft(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     created_by = models.CharField(null=True)
     documents = ArrayField(models.URLField(), blank=True, null=True)
-    image = models.ImageField(upload_to='grafts/images/', null=True)
+    image = models.FileField(upload_to='grafts/images', null=True)
     validated = models.BooleanField(default=False)
 
     def __str__(self):
