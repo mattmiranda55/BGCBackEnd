@@ -32,6 +32,7 @@ urlpatterns = [
     path("grafts/search/user", views.graft_detail_by_username),
     path("grafts/validate", views.validate_graft),
     path("grafts/imageupload", views.upload_image),
+    path("grafts/documentupload", views.upload_document),
     
     
     # User / Profile endpoints

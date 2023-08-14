@@ -9,6 +9,7 @@ from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.hashers import make_password
+from storages.backends.s3boto3 import S3Boto3Storage
 import jwt
 import datetime
 import json
@@ -117,6 +118,45 @@ def upload_image(request):
     
     
     
+
+"""
+
+Method for uploading documents to graft
+
+The incoming payload must contain the graft id, 
+and all of the files in seperate fields named "document"
+Formdata instead of JSON since we are sending files 
+
+"""
+@api_view(['POST'])
+def upload_document(request):
+    
+    if request.method == "POST":
+        
+        graftId = request.POST.get('graft_id')
+        documents = request.FILES.getlist('document')
+        
+        try:
+            graft = Graft.objects.filter(id=graftId).first()
+        except Graft.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
+        s3_storage = S3Boto3Storage()
+        documentUrls = []
+        
+        # adding documents 1 by 1
+        for document in documents:
+            s3_path = f'grafts/documents/{graftId}/{document.name}'
+            s3_url = s3_storage.url(s3_path)
+            s3_storage.save(s3_path, document)
+            documentUrls.append(s3_url)
+            # graft.documents.append(s3_url)  
+
+        graft.documents = documentUrls
+        print(graft.documents)
+        graft.save()
+        return JsonResponse({"Message" : "Documents succesfully added"})
+
 
 
 
