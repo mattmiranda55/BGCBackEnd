@@ -136,6 +136,12 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# =========================================================
+#
+# PayPal Config
+#
+# ==========================================================
+
 PAYPAL_RECIEVER_EMAIL = 'bonegraftingtruth@gmail.com'
 
 PAYPAL_TEST = True

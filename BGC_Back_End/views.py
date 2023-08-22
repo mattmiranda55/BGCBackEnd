@@ -736,3 +736,50 @@ PayPal Payment Views
 
 """
 
+@api_view(['POST'])
+def payment_form_single(request):
+    paypal_dict = {
+        "business": "bonegraftingtruth@gmail.com",
+        "amount": "5000",
+        "item_name": "Single Graft Upload",
+        "invoice": "unique-invoice-id",
+        "notify_url": request.build_absolute_uri(reverse('paypal-ipn')),
+        "return": request.build_absolute_uri(reverse('your-return-view')),
+        "cancel_return": request.build_absolute_uri(reverse('your-cancel-view')),
+    }
+
+    form = PayPalPaymentsForm(initial=paypal_dict)
+    context = {"form": form}
+    return render(request, "payment.html", context)
+
+@api_view(['POST'])
+def payment_form_multiple(request):
+    paypal_dict = {
+        "business": "bonegraftingtruth@gmail.com",
+        "amount": "25000",
+        "item_name": "Multiple Graft Uploads",
+        "invoice": "unique-invoice-id",
+        "notify_url": request.build_absolute_uri(reverse('paypal-ipn')),
+        "return": request.build_absolute_uri(reverse('your-return-view')),
+        "cancel_return": request.build_absolute_uri(reverse('your-cancel-view')),
+    }
+
+    form = PayPalPaymentsForm(initial=paypal_dict)
+    context = {"form": form}
+    return render(request, "payment.html", context)
+
+@api_view(['POST'])
+def payment_form_unlimited(request):
+    paypal_dict = {
+        "business": "bonegraftingtruth@gmail.com",
+        "amount": "50000",
+        "item_name": "Unlimited Graft Uploads",
+        "invoice": "unique-invoice-id",
+        "notify_url": request.build_absolute_uri(reverse('paypal-ipn')),
+        "return": request.build_absolute_uri(reverse('your-return-view')),
+        "cancel_return": request.build_absolute_uri(reverse('your-cancel-view')),
+    }
+
+    form = PayPalPaymentsForm(initial=paypal_dict)
+    context = {"form": form}
+    return render(request, "payment.html", context)
