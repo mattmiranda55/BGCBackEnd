@@ -13,6 +13,9 @@ from storages.backends.s3boto3 import S3Boto3Storage
 import jwt
 import datetime
 import json
+from django.urls import reverse
+from django.shortcuts import render
+from paypal.standard.forms import PayPalPaymentsForm
 
 
 
@@ -276,8 +279,8 @@ def graft_detail_by_username(request):
         data = json.loads(request.body)
         username = data.get('username')
         grafts = Graft.objects.filter(created_by=username)
-        responseData = list(grafts.values())
-        return JsonResponse(responseData, safe=False)
+        serializers = GraftSerializer(grafts, many=True)
+        return Response(serializers.data)
 
 
 
@@ -736,7 +739,7 @@ PayPal Payment Views
 
 """
 
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
 def payment_form_single(request):
     paypal_dict = {
         "business": "bonegraftingtruth@gmail.com",
@@ -744,8 +747,8 @@ def payment_form_single(request):
         "item_name": "Single Graft Upload",
         "invoice": "unique-invoice-id",
         "notify_url": request.build_absolute_uri(reverse('paypal-ipn')),
-        "return": request.build_absolute_uri(reverse('your-return-view')),
-        "cancel_return": request.build_absolute_uri(reverse('your-cancel-view')),
+        "return": request.build_absolute_uri(reverse(viewname=user_list)),
+        "cancel_return": request.build_absolute_uri(reverse(viewname=user_list)),
     }
 
     form = PayPalPaymentsForm(initial=paypal_dict)

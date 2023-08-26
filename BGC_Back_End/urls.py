@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from BGC_Back_End import views
 from rest_framework.urlpatterns import format_suffix_patterns
 
@@ -53,11 +53,12 @@ urlpatterns = [
     path("profiles/<int:user_id>", views.profile_detail_by_user_id),
     path("profilesByBusinessName/<str:business_name>", views.profile_detail_by_business_name),
 
-    path("pricing/purchase", views.user_purchase_credits)
+    path("pricing/purchase", views.user_purchase_credits),
+    path("pricing/purchase/single", views.payment_form_single),
     
     
    # PayPal endpoints
-#    path('paypal/', include('paypal.standard.ipn.urls')),
+   path('paypal/', include('paypal.standard.ipn.urls')),
     
     
 ]
