@@ -59,6 +59,8 @@ urlpatterns = [
     
    # PayPal endpoints
    path('paypal/', include('paypal.standard.ipn.urls')),
+   path('payment-completed', views.payment_completed),
+   path('payment-failed', views.payment_failed)
     
     
 ]

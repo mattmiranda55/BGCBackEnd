@@ -645,6 +645,27 @@ def logout(request):
         return response
     
     
+@api_view(['POST'])
+@csrf_exempt
+def change_password(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        email = data.get('email')
+        password = data.get('password')
+        
+        # find user by email in request payload
+        user = User.objects.filter(email=email).first()
+        
+        # if user not found
+        if user is None:
+            return JsonResponse({'message': 'Invalid email'})
+        
+        user.set_password(password)
+        user.save()
+
+        return JsonResponse({"message": "Password changed successfully"})
+
+
     
     
 """
@@ -741,48 +762,57 @@ PayPal Payment Views
 
 @api_view(['POST', 'GET'])
 def payment_form_single(request):
+    host = request.get_host()
     paypal_dict = {
-        "business": "bonegraftingtruth@gmail.com",
+        "business": settings.PAYPAL_RECIEVER_EMAIL,
         "amount": "5000",
         "item_name": "Single Graft Upload",
         "invoice": "unique-invoice-id",
-        "notify_url": request.build_absolute_uri(reverse('paypal-ipn')),
-        "return": request.build_absolute_uri(reverse(viewname=user_list)),
-        "cancel_return": request.build_absolute_uri(reverse(viewname=user_list)),
+        "notify_url": 'http://{}{}'.format(host, reverse("core:paypal-ipn")),
+        "return": 'http://{}{}'.format(host, reverse("core:payment-completed")),
+        "cancel_return": 'http://{}{}'.format(host, reverse("core:payment-failed")),
     }
 
-    form = PayPalPaymentsForm(initial=paypal_dict)
-    context = {"form": form}
-    return render(request, "payment.html", context)
+    paypal_payment_button = PayPalPaymentsForm(initial=paypal_dict)
+    context = {"form": paypal_payment_button}
+    return render(request, "PricingPage.js", context)
 
 @api_view(['POST'])
 def payment_form_multiple(request):
     paypal_dict = {
-        "business": "bonegraftingtruth@gmail.com",
+        "business": settings.PAYPAL_RECIEVER_EMAIL,
         "amount": "25000",
         "item_name": "Multiple Graft Uploads",
         "invoice": "unique-invoice-id",
-        "notify_url": request.build_absolute_uri(reverse('paypal-ipn')),
-        "return": request.build_absolute_uri(reverse('your-return-view')),
-        "cancel_return": request.build_absolute_uri(reverse('your-cancel-view')),
+        "notify_url": 'http://{}{}'.format(host, reverse("core:paypal-ipn")),
+        "return": 'http://{}{}'.format(host, reverse("core:payment-completed")),
+        "cancel_return": 'http://{}{}'.format(host, reverse("core:payment-failed")),
     }
 
     form = PayPalPaymentsForm(initial=paypal_dict)
     context = {"form": form}
-    return render(request, "payment.html", context)
+    return render(request, "PricingPage.js", context)
 
 @api_view(['POST'])
 def payment_form_unlimited(request):
     paypal_dict = {
-        "business": "bonegraftingtruth@gmail.com",
+        "business": settings.PAYPAL_RECIEVER_EMAIL,
         "amount": "50000",
         "item_name": "Unlimited Graft Uploads",
         "invoice": "unique-invoice-id",
-        "notify_url": request.build_absolute_uri(reverse('paypal-ipn')),
-        "return": request.build_absolute_uri(reverse('your-return-view')),
-        "cancel_return": request.build_absolute_uri(reverse('your-cancel-view')),
+        "notify_url": 'http://{}{}'.format(host, reverse("core:paypal-ipn")),
+        "return": 'http://{}{}'.format(host, reverse("core:payment-completed")),
+        "cancel_return": 'http://{}{}'.format(host, reverse("core:payment-failed")),
     }
 
     form = PayPalPaymentsForm(initial=paypal_dict)
     context = {"form": form}
-    return render(request, "payment.html", context)
+    return render(request, "PricingPage.js", context)
+
+@api_view(['POST', 'GET'])
+def payment_completed(request):
+    return render(request, 'pages/paymentCompleted.js')
+
+@api_view(['POST', 'GET'])
+def payment_failed(request):
+    return render(request, 'pages/paymentFailed.js')
