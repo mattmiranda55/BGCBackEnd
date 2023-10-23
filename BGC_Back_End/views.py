@@ -586,10 +586,10 @@ def loginUser(request):
             
     else:
         return JsonResponse({'message': 'Invalid authentication request'}, status=405)
-    
-    
-    
-    
+
+
+
+
 
 """
 
@@ -644,24 +644,46 @@ def logout(request):
         
         return response
     
+
     
 @api_view(['POST'])
-@csrf_exempt
 def change_password(request):
     if request.method == 'POST':
+
+        # pulling data from request
         data = json.loads(request.body)
+        token = data.get('jwt')
         email = data.get('email')
         password = data.get('password')
+        new_password = data.get('new_password')
+
+
+        if not token:
+            return JsonResponse({"message": "You are not logged in!"})
+
+        # validating jwt token
+        try:
+            payload = jwt.decode(token, 'BGCcret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            return JsonResponse({'message': 'Invalid web token'})  
         
-        # find user by email in request payload
-        user = User.objects.filter(email=email).first()
-        
+        # find user by id, using jwt
+        user = User.objects.filter(id=payload['id']).first()
+
         # if user not found
         if user is None:
             return JsonResponse({'message': 'Invalid email'})
         
-        user.set_password(password)
-        user.save()
+
+        # Check if the current password is correct
+        # Change password if correct
+        if authenticate(username=user.username, password=password):
+            user.set_password(new_password)
+            user.save()
+            return JsonResponse({'message': 'Password changed successfully'}, status=200)
+        else:
+            return JsonResponse({'error': 'Current password is incorrect'}, status=400)
+
 
         return JsonResponse({"message": "Password changed successfully"})
 
@@ -759,60 +781,3 @@ def user_purchase_credits(request):
 PayPal Payment Views
 
 """
-
-@api_view(['POST', 'GET'])
-def payment_form_single(request):
-    host = request.get_host()
-    paypal_dict = {
-        "business": settings.PAYPAL_RECIEVER_EMAIL,
-        "amount": "5000",
-        "item_name": "Single Graft Upload",
-        "invoice": "unique-invoice-id",
-        "notify_url": 'http://{}{}'.format(host, reverse("core:paypal-ipn")),
-        "return": 'http://{}{}'.format(host, reverse("core:payment-completed")),
-        "cancel_return": 'http://{}{}'.format(host, reverse("core:payment-failed")),
-    }
-
-    paypal_payment_button = PayPalPaymentsForm(initial=paypal_dict)
-    context = {"form": paypal_payment_button}
-    return render(request, "PricingPage.js", context)
-
-@api_view(['POST'])
-def payment_form_multiple(request):
-    paypal_dict = {
-        "business": settings.PAYPAL_RECIEVER_EMAIL,
-        "amount": "25000",
-        "item_name": "Multiple Graft Uploads",
-        "invoice": "unique-invoice-id",
-        "notify_url": 'http://{}{}'.format(host, reverse("core:paypal-ipn")),
-        "return": 'http://{}{}'.format(host, reverse("core:payment-completed")),
-        "cancel_return": 'http://{}{}'.format(host, reverse("core:payment-failed")),
-    }
-
-    form = PayPalPaymentsForm(initial=paypal_dict)
-    context = {"form": form}
-    return render(request, "PricingPage.js", context)
-
-@api_view(['POST'])
-def payment_form_unlimited(request):
-    paypal_dict = {
-        "business": settings.PAYPAL_RECIEVER_EMAIL,
-        "amount": "50000",
-        "item_name": "Unlimited Graft Uploads",
-        "invoice": "unique-invoice-id",
-        "notify_url": 'http://{}{}'.format(host, reverse("core:paypal-ipn")),
-        "return": 'http://{}{}'.format(host, reverse("core:payment-completed")),
-        "cancel_return": 'http://{}{}'.format(host, reverse("core:payment-failed")),
-    }
-
-    form = PayPalPaymentsForm(initial=paypal_dict)
-    context = {"form": form}
-    return render(request, "PricingPage.js", context)
-
-@api_view(['POST', 'GET'])
-def payment_completed(request):
-    return render(request, 'pages/paymentCompleted.js')
-
-@api_view(['POST', 'GET'])
-def payment_failed(request):
-    return render(request, 'pages/paymentFailed.js')
