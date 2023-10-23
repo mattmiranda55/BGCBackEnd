@@ -672,7 +672,7 @@ def change_password(request):
 
         # if user not found
         if user is None:
-            return JsonResponse({'message': 'Invalid email'})
+            return JsonResponse({'message': 'User not found'})
         
 
         # Check if the current password is correct
@@ -686,6 +686,51 @@ def change_password(request):
 
 
         return JsonResponse({"message": "Password changed successfully"})
+
+
+
+
+@api_view(['POST'])
+def change_username(request):
+    if request.method == 'POST':
+
+        # pulling data from request
+        data = json.loads(request.body)
+        token = data.get('jwt')
+        email = data.get('email')
+        password = data.get('password')
+        new_username = data.get('new_username')
+
+
+        if not token:
+            return JsonResponse({"message": "You are not logged in!"})
+
+        # validating and decoding jwt token
+        try:
+            payload = jwt.decode(token, 'BGCcret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            return JsonResponse({'message': 'Invalid web token'})  
+        
+        # find user by id, using jwt
+        user = User.objects.filter(id=payload['id']).first()
+
+        # if user not found
+        if user is None:
+            return JsonResponse({'message': 'User not found'})
+        
+
+        # Check if the current password is correct
+        # Change password if correct
+        if authenticate(username=user.username, password=password):
+            user.username = new_username 
+            user.save()
+            return JsonResponse({'message': 'Username changed successfully'}, status=200)
+        else:
+            return JsonResponse({'error': 'User info (username/password) is incorrect'}, status=400)
+
+
+        return JsonResponse({"message": "Password changed successfully"})
+
 
 
     

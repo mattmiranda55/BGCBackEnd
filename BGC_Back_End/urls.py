@@ -49,6 +49,7 @@ urlpatterns = [
     path("users/postgraft/", views.user_post_graft),
     path("users/deletegraft/", views.user_delete_graft),
     path("users/changepassword/", views.change_password),
+    path("users/changeusername/", views.change_username),
     
     path("profiles/", views.profile_list),
     path("profiles/<int:user_id>", views.profile_detail_by_user_id),
