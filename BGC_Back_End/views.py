@@ -714,6 +714,10 @@ def change_username(request):
         # find user by id, using jwt
         user = User.objects.filter(id=payload['id']).first()
 
+        existingUser = User.objects.filter(username=new_username).first()
+        if existingUser:
+            return JsonResponse({'message': 'Username already taken'})
+
         # if user not found
         if user is None:
             return JsonResponse({'message': 'User not found'})
@@ -726,10 +730,10 @@ def change_username(request):
             user.save()
             return JsonResponse({'message': 'Username changed successfully'}, status=200)
         else:
-            return JsonResponse({'error': 'User info (username/password) is incorrect'}, status=400)
+            return JsonResponse({'message': 'User info is incorrect'}, status=400)
 
 
-        return JsonResponse({"message": "Password changed successfully"})
+        return JsonResponse({"message": "Username changed successfully"})
 
 
 
