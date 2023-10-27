@@ -682,7 +682,7 @@ def change_password(request):
             user.save()
             return JsonResponse({'message': 'Password changed successfully'}, status=200)
         else:
-            return JsonResponse({'error': 'Current password is incorrect'}, status=400)
+            return JsonResponse({'message': 'Current password is incorrect'}, status=400)
 
 
         return JsonResponse({"message": "Password changed successfully"})
