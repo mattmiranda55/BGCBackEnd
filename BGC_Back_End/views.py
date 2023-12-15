@@ -830,3 +830,25 @@ def user_purchase_credits(request):
 PayPal Payment Views
 
 """
+# @api_view(['POST'])
+# def PaypalPaymentView(request):
+#     data = json.loads(request.data)
+#     amount = data.get('amount')
+#     status,payment_id,approved_url=make_paypal_payment(amount=amount,currency="USD",return_url="https://example.com/payment/paypal/success/",cancel_url="https://example.com")
+#     if status:
+#         handle_subscription_paypal(plan=plan,user_id=request.user,payment_id=payment_id)
+#         return Response({"success":True,"msg":"payment link has been successfully created","approved_url":approved_url},status=201)
+#     else:
+#         return Response({"success":False,"msg":"Authentication or payment failed"},status=400)
+
+# @api_view(['POST'])
+# def PaypalValidatePaymentView(request):
+#     data = json.loads(request.data)
+#     payment_id = data.get('payment_id')
+#     payment_status=verify_paypal_payment(payment_id=payment_id)
+#     if payment_status:
+#         # your business logic 
+        
+#         return Response({"success":True,"msg":"payment improved"},status=200)
+#     else:
+#         return Response({"success":False,"msg":"payment failed or cancelled"},status=200)

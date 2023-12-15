@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -90,14 +91,17 @@ WSGI_APPLICATION = "BGC_Back_End.wsgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get('DB_NAME'),
-        "USER": os.environ.get('DB_USER'),
-        "PASSWORD": os.environ.get('DB_PASS'),
-        "HOST": os.environ.get('DB_HOST'),
-        "PORT": "5432",
-    }
+    # "default": {
+    #     "ENGINE": "django.db.backends.postgresql",
+    #     "NAME": os.environ.get('DB_NAME'),
+    #     "USER": os.environ.get('DB_USER'),
+    #     "PASSWORD": os.environ.get('DB_PASS'),
+    #     "HOST": os.environ.get('DB_HOST'),
+    #     "PORT": "5432",
+    # }
+    "default":  dj_database_url.config(default=os.environ.get('DATABASE_URL'), 
+                                        engine='django_cockroachdb')
+        
 }
 
 
@@ -136,6 +140,8 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+
+
 # =========================================================
 #
 # PayPal Config
@@ -145,6 +151,15 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 PAYPAL_RECIEVER_EMAIL = 'bonegraftingtruth@gmail.com'
 
 PAYPAL_TEST = True
+
+PAYPAL_CLIENT_ID = 'your_paypal_client_id'
+PAYPAL_CLIENT_SECRET = 'your_paypal_client_secret'
+
+PAYPAL_MODE = 'sandbox'  # 'sandbox' for testing, 'live' for production
+
+# These are just placeholders, will probably handle this on the frontend
+PAYPAL_RETURN_URL = 'http://localhost:8000/payment/success/'
+PAYPAL_CANCEL_URL = 'http://localhost:8000/payment/cancel/'
 
 
 
