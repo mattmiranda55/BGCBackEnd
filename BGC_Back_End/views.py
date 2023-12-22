@@ -35,10 +35,19 @@ Nethod for GETting and POSTing grafts
 @csrf_exempt
 def graft_list(request, format=None):
 
+    # if request.method == "GET":
+    #     grafts = Graft.objects.all()
+    #     serializer = GraftSerializer(grafts, many=True)
+    #     return Response(serializer.data)
+    
+    
     if request.method == "GET":
         grafts = Graft.objects.all()
+        for graft in grafts:
+            graft.image = graft.get_image_url()  # Convert byte-like representation to string
         serializer = GraftSerializer(grafts, many=True)
         return Response(serializer.data)
+    
 
     """
     Storing new grafts
@@ -99,16 +108,21 @@ def validate_graft(request, format=None):
 """
 Method for uploading images to graft
 
-This is seperated from the graft POST request since the data type 
-is a file instead of JSON
+Takes in file and graft_id
+Sets the image field for the Graft
 """
 @api_view(['POST'])
 def upload_image(request):
     
     if request.method == "POST":
         
-        graftId = request.POST.get('graft_id')
+        # for some reason, id returns as 1 less than actual value
+        # this is so odd its almost comical. gotta love technology
+        graftId = int(request.POST.get('graft_id')) + 1
+        print(graftId)
+        
         image = request.FILES.get('image')
+        print(graftId)
         
         try:
             graft = Graft.objects.filter(id=graftId).first()

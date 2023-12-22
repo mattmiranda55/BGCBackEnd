@@ -3,11 +3,13 @@ from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.postgres.fields import ArrayField
+from storages.backends.s3boto3 import S3Boto3Storage
 
 # importing Django user model 
 from django.contrib.auth.models import User 
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+import binascii
     
 
 
@@ -43,12 +45,19 @@ class Graft(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     created_by = models.CharField(null=True)
     documents = ArrayField(models.CharField(), blank=True, null=True) 
-    # image = models.CharField(max_length=200)
-    image = models.FileField(upload_to='grafts/images', null=True)
+    image = models.ImageField(upload_to='grafts/images/', storage=S3Boto3Storage(), null=True)
     validated = models.BooleanField(default=False)
 
+    def get_image_url(self):
+        # Convert the byte-like representation to a string
+        if self.image and isinstance(self.image, bytes):
+            return self.image.decode('utf-8', errors='ignore').replace("\\x", "")
+        return None
+    
     def __str__(self):
         return self.name
+    
+    
 
 
 
