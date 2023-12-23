@@ -36,7 +36,7 @@ class Company(models.Model):
 
 
 class Graft(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     description = models.CharField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     regulation = models.ForeignKey(Regulation, on_delete=models.CASCADE)

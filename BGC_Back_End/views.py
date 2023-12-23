@@ -16,6 +16,11 @@ import json
 from django.urls import reverse
 from django.shortcuts import render
 from paypal.standard.forms import PayPalPaymentsForm
+import base64
+from django.db import connection
+import random
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 
 
@@ -35,20 +40,12 @@ Nethod for GETting and POSTing grafts
 @csrf_exempt
 def graft_list(request, format=None):
 
-    # if request.method == "GET":
-    #     grafts = Graft.objects.all()
-    #     serializer = GraftSerializer(grafts, many=True)
-    #     return Response(serializer.data)
-    
-    
     if request.method == "GET":
         grafts = Graft.objects.all()
-        for graft in grafts:
-            graft.image = graft.get_image_url()  # Convert byte-like representation to string
         serializer = GraftSerializer(grafts, many=True)
         return Response(serializer.data)
-    
 
+    
     """
     Storing new grafts
     """
@@ -97,10 +94,8 @@ def validate_graft(request, format=None):
         
         else:
             return JsonResponse({"message": "You do not have permission to approve grafts"})
-        
 
-        
-        
+
 
 
 
@@ -110,6 +105,8 @@ Method for uploading images to graft
 
 Takes in file and graft_id
 Sets the image field for the Graft
+
+There are 2 POST methods here, anmd it works so we are scared to touch it
 """
 @api_view(['POST'])
 def upload_image(request):
@@ -118,20 +115,43 @@ def upload_image(request):
         
         # for some reason, id returns as 1 less than actual value
         # this is so odd its almost comical. gotta love technology
-        graftId = int(request.POST.get('graft_id')) + 1
-        print(graftId)
-        
+        graftName = request.POST.get('graft_name')
+        print(graftName)
         image = request.FILES.get('image')
-        print(graftId)
         
         try:
-            graft = Graft.objects.filter(id=graftId).first()
+            graft = Graft.objects.filter(name=graftName).first()
         except Graft.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         
         graft.image = image
         graft.save()
         return JsonResponse({"Message" : "Image succesfully added"})
+    
+    
+    
+    
+    # if request.method == 'POST':
+    #     image = request.FILES.get('image')  # Assuming your form has an 'image' field
+    #     graftName = request.POST.get('graft_name')
+
+    #     # Generate a unique filename (adjust as needed)
+    #     filename = f"images/{graftName}_{random.randint(0,1000000)}.jpg"
+
+    #     # Upload the image to S3
+    #     file_path = default_storage.save(filename, ContentFile(image.read()))
+
+    #     # Get the URL of the uploaded image
+    #     image_url = default_storage.url(file_path)
+        
+    #     try:
+    #         graft = Graft.objects.filter(name=graftName).first()
+    #     except Graft.DoesNotExist:
+    #         return Response(status=status.HTTP_404_NOT_FOUND)
+
+    #     graft.image = image_url
+    #     graft.save()
+    #     return JsonResponse({"Message" : "Image succesfully added"})
     
     
     
@@ -150,11 +170,11 @@ def upload_document(request):
     
     if request.method == "POST":
         
-        graftId = request.POST.get('graft_id')
+        graftName = request.POST.get('graft_name')
         documents = request.FILES.getlist('document')
         
         try:
-            graft = Graft.objects.filter(id=graftId).first()
+            graft = Graft.objects.filter(name=graftName).first()
         except Graft.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         
@@ -163,7 +183,7 @@ def upload_document(request):
         
         # adding documents 1 by 1
         for document in documents:
-            s3_path = f'grafts/documents/{graftId}/{document.name}'
+            s3_path = f'grafts/documents/{graftName}/{document.name}'
             s3_url = s3_storage.url(s3_path)
             s3_storage.save(s3_path, document)
             documentUrls.append(s3_url)
