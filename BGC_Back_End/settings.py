@@ -155,13 +155,13 @@ PAYPAL_RECIEVER_EMAIL = 'bonegraftingtruth@gmail.com'
 PAYPAL_TEST = True
 
 PAYPAL_CLIENT_ID = os.environ.get('PAYPAL_CLIENT')
-PAYPAL_CLIENT_SECRET = os.environ.get('PAYPAL_SECRET')
+PAYPAL_SECRET = os.environ.get('PAYPAL_SECRET')
 
 PAYPAL_MODE = 'sandbox'  # 'sandbox' for testing, 'live' for production
 
 # These are just placeholders, will probably handle this on the frontend
-PAYPAL_RETURN_URL = 'http://localhost:8000/payment/success/'
-PAYPAL_CANCEL_URL = 'http://localhost:8000/payment/cancel/'
+# PAYPAL_RETURN_URL = 'http://localhost:8000/payment/success/'
+# PAYPAL_CANCEL_URL = 'http://localhost:8000/payment/cancel/'
 
 
 

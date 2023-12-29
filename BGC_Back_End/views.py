@@ -21,6 +21,8 @@ from django.db import connection
 import random
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from paypalrestsdk import Payment
+
 
 
 
@@ -566,7 +568,6 @@ def profile_detail_by_phone_number(request, phone_number, format=None):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
     
-    
 
 
 
@@ -719,9 +720,6 @@ def change_password(request):
             return JsonResponse({'message': 'Current password is incorrect'}, status=400)
 
 
-        return JsonResponse({"message": "Password changed successfully"})
-
-
 
 
 @api_view(['POST'])
@@ -859,30 +857,69 @@ def user_purchase_credits(request):
             
 
 
+
+
+
 """
 
 PayPal Payment Views
 
-"""
-# @api_view(['POST'])
-# def PaypalPaymentView(request):
-#     data = json.loads(request.data)
-#     amount = data.get('amount')
-#     status,payment_id,approved_url=make_paypal_payment(amount=amount,currency="USD",return_url="https://example.com/payment/paypal/success/",cancel_url="https://example.com")
-#     if status:
-#         handle_subscription_paypal(plan=plan,user_id=request.user,payment_id=payment_id)
-#         return Response({"success":True,"msg":"payment link has been successfully created","approved_url":approved_url},status=201)
-#     else:
-#         return Response({"success":False,"msg":"Authentication or payment failed"},status=400)
+1. We receive request that contains payment info and item purchased
+2. This info is used to fill out paypal payment 
+3. Successful payment returned
 
-# @api_view(['POST'])
-# def PaypalValidatePaymentView(request):
-#     data = json.loads(request.data)
-#     payment_id = data.get('payment_id')
-#     payment_status=verify_paypal_payment(payment_id=payment_id)
-#     if payment_status:
-#         # your business logic 
+Make sure the request copntains the item they are purchasing as well
+"""
+
+
+
+def create_payment(request):
+    
+    data = json.loads(request.body)
+    item = data.get('item_purchased')
+    
+    description = ""
+    price = 0
+    
+    
+    # Handling price and description based on the item purchased
+    
+    if item == "1 credit":
+        price = 5000
+        description = "Ability to post one graft. Includes customer support"
         
-#         return Response({"success":True,"msg":"payment improved"},status=200)
-#     else:
-#         return Response({"success":False,"msg":"payment failed or cancelled"},status=200)
+    elif item == "8 credits":
+        price = 25000
+        description = "Ability to post 8 grafts. Includes a large saving per post and direct contact to developers"
+    
+    elif item == "unlimited credits":
+        price = 35000
+        description = "Ability to post unlimited grafts. Best long term deal. Includes direct developer and CEO contact"
+        
+    
+    
+    if price != 0:
+
+        # payment form
+        payment = Payment({
+            "intent": "sale",                                   # The payment intent, set to "sale" for a regular payment
+            "payer": {"payment_method": "paypal"},
+            "redirect_urls": {
+                "return_url": "http://localhost:3000/success",  # URL to redirect to on successful payment
+                "cancel_url": "http://localhost:3000/cancel"    # URL to redirect to on canceled payment
+            },
+            "transactions": [{
+                "amount": {
+                    "total": price,                             # Total amount of the payment
+                    "currency": "USD"                           # Currency code for the total amount
+                },
+                "description": description                      # Description of your product or item
+            }]
+        })
+
+
+        # processing payment and returning response
+        if payment.create():
+            return JsonResponse({"payment_id": payment.id})
+        else:
+            return JsonResponse({"error": payment.error})
