@@ -257,6 +257,21 @@ def graft_detail_by_id(request, id, format=None):
 
 
 
+# This method will be utilized by the dynamic routing of SingleProductPage
+@api_view(['GET', 'PUT', 'DELETE'])
+def graft_detail_by_name(request, name, format=None):
+    
+    try:
+        graft = Graft.objects.get(name=name)
+    except Graft.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serializer = GraftSerializer(graft)
+        return Response(serializer.data)
+
+
+
 
 @api_view(['GET'])
 def graft_detail_by_category(request, category, format=None):
