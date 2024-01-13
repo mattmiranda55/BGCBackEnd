@@ -890,6 +890,39 @@ Make sure the request copntains the item they are purchasing as well
 
 
 
+
+def get_paypal_access_token():
+    
+    # Concatenate the client ID and secret separated by a colon
+    credentials = f'{settings.PAYPAL_CLIENT_ID}:{settings.PAYPAL_SECRET}'
+    
+    # Base64 encode the credentials
+    credentials_base64 = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
+
+    # Define headers for the token request
+    headers = {
+        'Authorization': f'Basic {credentials_base64}',
+        'Content-Type': 'application/x-www-form-urlencoded',
+    }
+
+    # Define the token request payload
+    data = {
+        'grant_type': 'client_credentials',
+    }
+
+    # Make the token request to PayPal
+    response = requests.post('https://api.sandbox.paypal.com/v1/oauth2/token', headers=headers, data=data)
+
+    # Parse the response JSON
+    response_data = response.json()
+
+    # Extract and return the access token
+    access_token = response_data.get('access_token', None)
+    return access_token
+
+
+
+
 @require_http_methods(["POST"])
 @api_view(['POST'])
 @csrf_exempt
@@ -902,13 +935,20 @@ def create_payment(request):
             order_id = data.get('orderId')
             payer_id = data.get('payerId')
             payment_id = data.get('paymentId')
+            
+            
+            # Obtain a fresh PayPal access token
+            access_token = get_paypal_access_token()
+            if not access_token:
+                return JsonResponse({'status': 'error', 'message': 'Unable to obtain PayPal access token'})
+
 
             # Use the secret key to interact with PayPal API
             response = requests.post(
                 f'https://api.sandbox.paypal.com/v2/checkout/orders/{order_id}/capture',
                 headers={
                     'Content-Type': 'application/json',
-                    'Authorization': f'Bearer {settings.PAYPAL_SECRET}',
+                    'Authorization': f'Bearer {access_token}',
                 }
             )
 
