@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from django.conf import settings
 from .models import Graft, Category, Regulation, Profile
 from django.contrib.auth.models import User
 from .serializers import GraftSerializer, ProfileSerializer, UserSerializer
@@ -13,6 +14,7 @@ from storages.backends.s3boto3 import S3Boto3Storage
 import jwt
 import datetime
 import json
+import requests
 from django.urls import reverse
 from django.shortcuts import render
 from paypal.standard.forms import PayPalPaymentsForm
@@ -22,7 +24,7 @@ import random
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from paypalrestsdk import Payment
-
+from django.views.decorators.http import require_http_methods
 
 
 
@@ -888,53 +890,101 @@ Make sure the request copntains the item they are purchasing as well
 
 
 
+@require_http_methods(["POST"])
+@api_view(['POST'])
+@csrf_exempt
 def create_payment(request):
+    print("create_payment initialized")
+
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            order_id = data.get('orderId')
+            payer_id = data.get('payerId')
+            payment_id = data.get('paymentId')
+
+            # Use the secret key to interact with PayPal API
+            response = requests.post(
+                f'https://api.sandbox.paypal.com/v2/checkout/orders/{order_id}/capture',
+                headers={
+                    'Content-Type': 'application/json',
+                    'Authorization': f'Bearer {settings.PAYPAL_SECRET}',
+                }
+            )
+
+            # Check if the capture was successful
+            if response.status_code == 201:
+                # Perform additional processing or handle success
+                response_data = {
+                    'message': 'Payment processed successfully',
+                    'orderId': order_id,
+                    'payerId': payer_id,
+                    'paymentId': payment_id,
+                }
+            else:
+                # Handle error scenarios
+                response_data = {
+                    'error': 'Payment capture failed',
+                    'details': response.json(),
+                }
+
+            return JsonResponse(response_data)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format"}, status=400)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+
+
+# def create_payment(request):
     
-    data = json.loads(request.body)
-    item = data.get('item_purchased')
+#     data = json.loads(request.body)
+#     item = data.get('item_purchased')
     
-    description = ""
-    price = 0
+#     description = ""
+#     price = 0
     
     
-    # Handling price and description based on the item purchased
+#     # Handling price and description based on the item purchased
     
-    if item == "1 credit":
-        price = 5000
-        description = "Ability to post one graft. Includes customer support"
+#     if item == "single":
+#         price = 5000
+#         description = "Ability to post one graft. Includes customer support"
         
-    elif item == "8 credits":
-        price = 25000
-        description = "Ability to post 8 grafts. Includes a large saving per post and direct contact to developers"
+#     elif item == "multiple":
+#         price = 25000
+#         description = "Ability to post 8 grafts. Includes a large saving per post and direct contact to developers"
     
-    elif item == "unlimited credits":
-        price = 35000
-        description = "Ability to post unlimited grafts. Best long term deal. Includes direct developer and CEO contact"
+#     elif item == "unlimited":
+#         price = 35000
+#         description = "Ability to post unlimited grafts. Best long term deal. Includes direct developer and CEO contact"
         
     
     
-    if price != 0:
+#     if price != 0:
 
-        # payment form
-        payment = Payment({
-            "intent": "sale",                                   # The payment intent, set to "sale" for a regular payment
-            "payer": {"payment_method": "paypal"},
-            "redirect_urls": {
-                "return_url": "http://localhost:3000/success",  # URL to redirect to on successful payment
-                "cancel_url": "http://localhost:3000/cancel"    # URL to redirect to on canceled payment
-            },
-            "transactions": [{
-                "amount": {
-                    "total": price,                             # Total amount of the payment
-                    "currency": "USD"                           # Currency code for the total amount
-                },
-                "description": description                      # Description of your product or item
-            }]
-        })
+#         # payment form
+#         payment = Payment({
+#             "intent": "sale",                                   # The payment intent, set to "sale" for a regular payment
+#             "payer": {"payment_method": "paypal"},
+#             "redirect_urls": {
+#                 "return_url": "http://localhost:3000/success",  # URL to redirect to on successful payment
+#                 "cancel_url": "http://localhost:3000/cancel"    # URL to redirect to on canceled payment
+#             },
+#             "transactions": [{
+#                 "amount": {
+#                     "total": price,                             # Total amount of the payment
+#                     "currency": "USD"                           # Currency code for the total amount
+#                 },
+#                 "description": description                      # Description of your product or item
+#             }]
+#         })
 
 
-        # processing payment and returning response
-        if payment.create():
-            return JsonResponse({"payment_id": payment.id})
-        else:
-            return JsonResponse({"error": payment.error})
+#         # processing payment and returning response
+#         if payment.create():
+#             return JsonResponse({"payment_id": payment.id})
+#         else:
+#             return JsonResponse({"error": payment.error})

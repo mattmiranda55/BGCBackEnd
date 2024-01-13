@@ -14,6 +14,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 import dj_database_url
+import paypalrestsdk
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -61,8 +63,38 @@ MIDDLEWARE = [
 
 
 
+# CORS settings 
+
+
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
+
 
 
 
@@ -162,6 +194,12 @@ PAYPAL_MODE = 'sandbox'  # 'sandbox' for testing, 'live' for production
 # These are just placeholders, will probably handle this on the frontend
 # PAYPAL_RETURN_URL = 'http://localhost:8000/payment/success/'
 # PAYPAL_CANCEL_URL = 'http://localhost:8000/payment/cancel/'
+
+paypalrestsdk.configure({
+    "mode": "sandbox",  # Set the mode to "sandbox" for testing
+    "client_id": os.environ.get('PAYPAL_CLIENT'),
+    "client_secret": os.environ.get('PAYPAL_SECRET'),
+})
 
 
 

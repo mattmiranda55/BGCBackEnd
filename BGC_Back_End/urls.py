@@ -55,15 +55,13 @@ urlpatterns = [
     path("profiles/", views.profile_list),
     path("profiles/<int:user_id>", views.profile_detail_by_user_id),
     path("profilesByBusinessName/<str:business_name>", views.profile_detail_by_business_name),
-
-#     path("pricing/purchase", views.user_purchase_credits),
-#     path("pricing/purchase/single", views.payment_form_single),
     
     
-#    # PayPal endpoints
+   # PayPal endpoints
 #    path('paypal/', include('paypal.standard.ipn.urls')),
 #    path('payment-completed', views.payment_completed),
-#    path('payment-failed', views.payment_failed)
+#    path('payment-failed', views.payment_failed),
+    path('create-payment/', views.create_payment)
     
     
 ]
