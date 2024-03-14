@@ -113,12 +113,13 @@ Sets the image field for the Graft
 There are 2 POST methods here, anmd it works so we are scared to touch it
 """
 @api_view(['POST'])
+@csrf_exempt
 def upload_image(request):
+    
+    print("Image upload begin")
     
     if request.method == "POST":
         
-        # for some reason, id returns as 1 less than actual value
-        # this is so odd its almost comical. gotta love technology
         graftName = request.POST.get('graft_name')
         print(graftName)
         image = request.FILES.get('image')
@@ -129,7 +130,12 @@ def upload_image(request):
             return Response(status=status.HTTP_404_NOT_FOUND)
         
         graft.image = image
-        graft.save()
+        
+        try:
+            graft.save()
+        except:
+            return JsonResponse({"Message" : "Image not added"})
+            
         return JsonResponse({"Message" : "Image succesfully added"})
     
     
@@ -260,17 +266,17 @@ def graft_detail_by_id(request, id, format=None):
 
 
 # This method will be utilized by the dynamic routing of SingleProductPage
-@api_view(['GET', 'PUT', 'DELETE'])
-def graft_detail_by_name(request, name, format=None):
+# @api_view(['GET', 'PUT', 'DELETE'])
+# def graft_detail_by_name(request, name, format=None):
     
-    try:
-        graft = Graft.objects.get(name=name)
-    except Graft.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+#     try:
+#         graft = Graft.objects.get(name=name)
+#     except Graft.DoesNotExist:
+#         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == "GET":
-        serializer = GraftSerializer(graft)
-        return Response(serializer.data)
+#     if request.method == "GET":
+#         serializer = GraftSerializer(graft)
+#         return Response(serializer.data)
 
 
 
