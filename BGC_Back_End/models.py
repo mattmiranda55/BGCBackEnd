@@ -15,35 +15,35 @@ import binascii
 
 
 class Regulation(models.Model):
-    name = models.CharField()
+    name = models.CharField(max_length=200)
 
     def __str__(self):
         return self.name
 
 
 class Category(models.Model):
-    name = models.CharField()
+    name = models.CharField(max_length=200)
 
     def __str__(self):
         return self.name
 
 
 class Company(models.Model):
-    name = models.CharField()
-    address = models.CharField()
+    name = models.CharField(max_length=200)
+    address = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
 class Graft(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    description = models.CharField()
+    description = models.CharField(max_length=200)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     regulation = models.ForeignKey(Regulation, on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
-    purchase_link = models.CharField(blank=True)
+    purchase_link = models.CharField(blank=True, max_length=200)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
-    created_by = models.CharField(null=True)
-    documents = ArrayField(models.CharField(), blank=True, null=True) 
+    created_by = models.CharField(null=True, max_length=200)
+    documents = ArrayField(models.CharField(max_length=200), blank=True, null=True) 
     image = models.ImageField(upload_to='grafts/images/', storage=S3Boto3Storage(), null=True)
     validated = models.BooleanField(default=False)
 

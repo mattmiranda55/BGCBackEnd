@@ -31,7 +31,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['34.201.53.67']
+ALLOWED_HOSTS = ['34.201.53.67', 'localhost', '127.0.0.1', 'BGCBackEnd-dev.us-east-1.elasticbeanstalk.com']
 
 
 # Application definition
